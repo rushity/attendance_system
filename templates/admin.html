@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+
+    <h2>Admin Panel</h2>
+
+    <form method="POST">
+        <input type="text" name="topic" placeholder="Lecture Topic" value="{{ topic }}" required {% if code %}disabled{%
+            endif %}>
+
+        <input type="date" name="date" id="lectureDate" value="{{ date }}" required {% if code %}disabled{% endif %}>
+
+        <button type="submit" {% if code %}disabled{% endif %}>
+            {% if code %}Code Active{% else %}Generate Code{% endif %}
+        </button>
+    </form>
+
+    {% if code %}
+    <div style="margin-top: 2rem; padding: 1.5rem; background: var(--background); border-radius: var(--radius-sm);">
+        <h3 style="margin-top: 0;">Code: <span style="color: var(--primary); font-size: 1.5rem;">{{ code }}</span></h3>
+        <h4>Total Students Present: <span id="totalCount">{{ total }}</span></h4>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <a href="/invalidate" style="flex: 1;"><button style="background-color: #ef4444;">Invalidate
+                    Code</button></a>
+            <a href="/download" style="flex: 1;"><button style="background-color: #10b981;">Download</button></a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Enrollment</th>
+                    <th>Name</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Section</th>
+                    <th>Course</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceBody"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+<script>
+    const socket = io();
+
+    socket.on("new_attendance", function (data) {
+
+        const tbody = document.getElementById("attendanceBody");
+        const totalCount = document.getElementById("totalCount");
+
+        tbody.innerHTML = "";
+
+        data.forEach(r => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td>${r.Enrollment}</td>
+            <td>${r.Name}</td>
+            <td>${r.Latitude}</td>
+            <td>${r.Longitude}</td>
+            <td>${r.Section}</td>
+            <td>${r.Course || "-"}</td>
+        `;
+            tbody.appendChild(row);
+        });
+
+        totalCount.innerText = data.length;
+    });
+
+    // Set max date to today to prevent future date selection
+    const dateInput = document.getElementById('lectureDate');
+    if (dateInput) {
+        dateInput.max = new Date().toISOString().split("T")[0];
+    }
+</script>
+
+{% endblock %}

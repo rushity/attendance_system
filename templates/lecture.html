@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+
+    <h2>{{ topic }}</h2>
+    <p>{{ date }}</p>
+
+    <!-- Hidden fields to send attendance -->
+    <input type="hidden" id="enrollment" value="{{ request.args.get('enrollment') }}">
+    <input type="hidden" id="name" value="{{ request.args.get('name') }}">
+    <input type="hidden" id="latitude" value="{{ request.args.get('latitude') }}">
+    <input type="hidden" id="longitude" value="{{ request.args.get('longitude') }}">
+    <input type="hidden" id="section" value="{{ request.args.get('section') }}">
+    <input type="hidden" id="course" value="{{ request.args.get('course') }}">
+
+    <button onclick="markAttendance()">I Am Present</button>
+
+</div>
+
+<script>
+    function markAttendance() {
+
+        const data = new URLSearchParams({
+            enrollment: document.getElementById("enrollment").value,
+            name: document.getElementById("name").value,
+            latitude: document.getElementById("latitude").value,
+            longitude: document.getElementById("longitude").value,
+            section: document.getElementById("section").value,
+            course: document.getElementById("course").value
+        });
+
+        fetch("/mark_attendance", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: data
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === "success") {
+                    alert("Attendance Successfully Added!");
+                    window.location.href = "/";
+                } else if (result.status === "already") {
+                    alert("Attendance Already Marked!");
+                    window.location.href = "/";
+                }
+            });
+    }
+</script>
+
+{% endblock %}

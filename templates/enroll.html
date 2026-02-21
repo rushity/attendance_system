@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <div class="logo-box">
+        <img src="/static/logo.png">
+    </div>
+
+    <form action="/validate" method="POST">
+        <input type="text" name="enrollment" placeholder="Enter Enrollment Number" required>
+
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+<script src="/static/js/main.js"></script>
+
+<script>
+function validateForm() {
+    const lat = document.getElementById("latitude").value;
+    const lon = document.getElementById("longitude").value;
+
+    if (!lat || !lon) {
+        alert("Please enable location access before submitting.");
+        return false;
+    }
+
+    return true;
+}
+
+getLocation();
+</script>
+
+{% endblock %}
